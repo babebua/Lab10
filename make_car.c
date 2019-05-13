@@ -77,13 +77,13 @@ void addSpray() {
 
 void sendCar() {
     tireSeatEngineReady = FALSE;
-    numTireInLine = FALSE;
-    numSprayInLine = FALSE;
-    numChasisInLine = FALSE;
     numSeatInLine = FALSE;
     numEngineInLine = FALSE;
+    numTireInLine = FALSE;
     numRoofInLine = FALSE;
+    numSprayInLine = FALSE;
     carReady = FALSE;
+    numChasisInLine = FALSE;
 }
 
 void *chasisAdder(void *arg) {
