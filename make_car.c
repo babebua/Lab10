@@ -23,11 +23,7 @@ pthread_mutex_t tireSeatEngine_mutex;
 pthread_cond_t tireSeatEngine;
 pthread_cond_t roof;
 pthread_cond_t spray;
-
-// pthread_cond_t tire;
 pthread_cond_t chasis;
-// pthread_cond_t seat;
-// pthread_cond_t engine;
 pthread_cond_t carIsDone;
 
 void addChasis() {
@@ -40,27 +36,26 @@ void addTire() {
     pthread_mutex_lock(&tireSeatEngine_mutex);
     numTireInLine += 1;
     printf("A puts tires\n");
-    if (numSeatInLine && numEngineInLine) {
+    if (numSeatInLine && numEngineInLine)
         tireSeatEngineReady = TRUE;
-    }
     pthread_mutex_unlock(&tireSeatEngine_mutex);
 }
+
 void addSeat() {
     pthread_mutex_lock(&tireSeatEngine_mutex);
     printf("C attaches seats\n");
     numSeatInLine += 1;
-    if (numTireInLine && numEngineInLine) {
+    if (numTireInLine && numEngineInLine)
         tireSeatEngineReady = TRUE;
-    }
     pthread_mutex_unlock(&tireSeatEngine_mutex);
 }
+
 void addEngine() {
     pthread_mutex_lock(&tireSeatEngine_mutex);
     printf("D places engine\n");
     numEngineInLine += 1;
-    if (numTireInLine && numSeatInLine) {
+    if (numTireInLine && numSeatInLine)
         tireSeatEngineReady = TRUE;
-    }
     pthread_mutex_unlock(&tireSeatEngine_mutex);
 }
 
@@ -98,9 +93,9 @@ void *chasisAdder(void *arg) {
         sleep(1);
         pthread_cond_broadcast(&tireSeatEngine);
 
-        while (!carReady) {
+        while (!carReady)
             pthread_cond_wait(&carIsDone, &lock);
-        }
+
         sendCar();
         sleep(1);
     }
@@ -109,51 +104,53 @@ void *chasisAdder(void *arg) {
 void *tireAndSprayAdder(void *arg) {
     pthread_mutex_lock(&lock);
     while (TRUE) {
-        while (!numChasisInLine || numTireInLine) {
+        while (!numChasisInLine || numTireInLine)
             pthread_cond_wait(&tireSeatEngine, &lock);
-        }
+
         addTire();
         sleep(1);
         pthread_cond_signal(&roof);
 
-        while (!numRoofInLine) {
+        while (!numRoofInLine)
             pthread_cond_wait(&spray, &lock);
-        }
+
         addSpray();
         sleep(1);
-        // printf("wake done");
         pthread_cond_signal(&carIsDone);
     }
 }
+
 void *seatAdder(void *arg) {
     pthread_mutex_lock(&lock);
     while (1) {
-        while (!numChasisInLine || numSeatInLine) {
+        while (!numChasisInLine || numSeatInLine)
             pthread_cond_wait(&tireSeatEngine, &lock);
-        }
+
         addSeat();
         sleep(1);
         pthread_cond_signal(&roof);
     }
 }
+
 void *engineAndRoofAdder(void *arg) {
     pthread_mutex_lock(&lock);
     while (1) {
-        while (!numChasisInLine || numEngineInLine) {
+        while (!numChasisInLine || numEngineInLine)
             pthread_cond_wait(&tireSeatEngine, &lock);
-        }
+
         addEngine();
         sleep(1);
         pthread_cond_signal(&roof);
 
-        while (!tireSeatEngineReady) {
+        while (!tireSeatEngineReady)
             pthread_cond_wait(&roof, &lock);
-        }
+
         addRoof();
         sleep(1);
         pthread_cond_signal(&spray);
     }
 }
+
 int main(int argc, char *argv[]) {
     pthread_mutex_init(&lock, 0);
     pthread_mutex_init(&tireSeatEngine_mutex, 0);
@@ -174,8 +171,8 @@ int main(int argc, char *argv[]) {
     pthread_create(&thread3, NULL, seatAdder, NULL);
     pthread_create(&thread4, NULL, engineAndRoofAdder, NULL);
 
-    while (1) {
+    while (1)
         sleep(1000);
-    }
+
     return 0;
 }
