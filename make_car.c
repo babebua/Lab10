@@ -84,7 +84,6 @@ void sendCar() {
     numEngineInLine = FALSE;
     numRoofInLine = FALSE;
     carReady = FALSE;
-    carNumber = FALSE;
 }
 
 void *chasisAdder(void *arg) {
