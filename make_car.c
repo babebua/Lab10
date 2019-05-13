@@ -7,12 +7,12 @@
 
 int tireSeatEngineReady = FALSE;
 
-int numTireInLine = FALSE;
-int numSprayInLine = FALSE;
-int numChasisInLine = FALSE;
-int numSeatInLine = FALSE;
-int numEngineInLine = FALSE;
-int numRoofInLine = FALSE;
+int isTireInLine = FALSE;
+int isSprayInLine = FALSE;
+int isChasisInLine = FALSE;
+int isSeatInLine = FALSE;
+int isEngineInLine = FALSE;
+int isRoofInLine = FALSE;
 
 int carReady = FALSE;
 int carNumber = 0;
@@ -27,16 +27,16 @@ pthread_cond_t chasis;
 pthread_cond_t carIsDone;
 
 void addChasis() {
-    numChasisInLine += 1;
+    isChasisInLine += 1;
     printf("Car #%d\n", ++carNumber);
     printf("B puts chassis on the conveyor\n");
 }
 
 void addTire() {
     pthread_mutex_lock(&tireSeatEngine_mutex);
-    numTireInLine += 1;
+    isTireInLine += 1;
     printf("A puts tires\n");
-    if (numSeatInLine && numEngineInLine)
+    if (isSeatInLine && isEngineInLine)
         tireSeatEngineReady = TRUE;
     pthread_mutex_unlock(&tireSeatEngine_mutex);
 }
@@ -44,8 +44,8 @@ void addTire() {
 void addSeat() {
     pthread_mutex_lock(&tireSeatEngine_mutex);
     printf("C attaches seats\n");
-    numSeatInLine += 1;
-    if (numTireInLine && numEngineInLine)
+    isSeatInLine += 1;
+    if (isTireInLine && isEngineInLine)
         tireSeatEngineReady = TRUE;
     pthread_mutex_unlock(&tireSeatEngine_mutex);
 }
@@ -53,38 +53,38 @@ void addSeat() {
 void addEngine() {
     pthread_mutex_lock(&tireSeatEngine_mutex);
     printf("D places engine\n");
-    numEngineInLine += 1;
-    if (numTireInLine && numSeatInLine)
+    isEngineInLine += 1;
+    if (isTireInLine && isSeatInLine)
         tireSeatEngineReady = TRUE;
     pthread_mutex_unlock(&tireSeatEngine_mutex);
 }
 
 void addRoof() {
-    numRoofInLine += 1;
+    isRoofInLine += 1;
     printf("D assembles top cover\n");
 }
 
 void addSpray() {
-    numSprayInLine += 1;
+    isSprayInLine += 1;
     printf("A paints\n\n");
     carReady = TRUE;
 }
 
 void sendCar() {
     tireSeatEngineReady = FALSE;
-    numSeatInLine = FALSE;
-    numEngineInLine = FALSE;
-    numTireInLine = FALSE;
-    numRoofInLine = FALSE;
-    numSprayInLine = FALSE;
+    isSeatInLine = FALSE;
+    isEngineInLine = FALSE;
+    isTireInLine = FALSE;
+    isRoofInLine = FALSE;
+    isSprayInLine = FALSE;
     carReady = FALSE;
-    numChasisInLine = FALSE;
+    isChasisInLine = FALSE;
 }
 
 void *chasisAdder(void *arg) {
     pthread_mutex_lock(&lock);
     while (TRUE) {
-        while (numChasisInLine) {
+        while (isChasisInLine) {
             pthread_cond_wait(&chasis,
                               &lock); // use chasis because wait chasis to
                                       // install before do anything else
@@ -104,14 +104,14 @@ void *chasisAdder(void *arg) {
 void *tireAndSprayAdder(void *arg) {
     pthread_mutex_lock(&lock);
     while (TRUE) {
-        while (!numChasisInLine || numTireInLine)
+        while (!isChasisInLine || isTireInLine)
             pthread_cond_wait(&tireSeatEngine, &lock);
 
         addTire();
         sleep(1);
         pthread_cond_signal(&roof);
 
-        while (!numRoofInLine)
+        while (!isRoofInLine)
             pthread_cond_wait(&spray, &lock);
 
         addSpray();
@@ -123,7 +123,7 @@ void *tireAndSprayAdder(void *arg) {
 void *seatAdder(void *arg) {
     pthread_mutex_lock(&lock);
     while (1) {
-        while (!numChasisInLine || numSeatInLine)
+        while (!isChasisInLine || isSeatInLine)
             pthread_cond_wait(&tireSeatEngine, &lock);
 
         addSeat();
@@ -135,7 +135,7 @@ void *seatAdder(void *arg) {
 void *engineAndRoofAdder(void *arg) {
     pthread_mutex_lock(&lock);
     while (1) {
-        while (!numChasisInLine || numEngineInLine)
+        while (!isChasisInLine || isEngineInLine)
             pthread_cond_wait(&tireSeatEngine, &lock);
 
         addEngine();

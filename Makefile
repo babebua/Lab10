@@ -8,5 +8,6 @@ clean:
 
 make_cake: make_cake.c
 	gcc -I $(INCLUDES) -o make_cake make_cake.c $(FLAGS)
+	
 make_car: make_car.c
 	gcc -I $(INCLUDES) -o make_car make_car.c $(FLAGS)

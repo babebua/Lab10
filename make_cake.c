@@ -1,34 +1,41 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
+
 #define TRUE 1
 #define FALSE 0
 int numBatterInBowl = 0;
 int numEggInBowl = 0;
 int readyToEat = FALSE;
+
 pthread_mutex_t lock;
 pthread_cond_t needIngredients;
 pthread_cond_t readyToBake;
 pthread_cond_t startEating;
+
 void addBatter() {
     numBatterInBowl += 1;
     printf("Added batter\n");
 }
+
 void addEgg() {
     numEggInBowl += 1;
     printf("Added egg\n");
 }
+
 void heatBowl() {
     readyToEat = TRUE;
     numBatterInBowl = 0;
     numEggInBowl = 0;
     printf("Heated bowl\n");
 }
+
 void eatCake() {
     readyToEat = FALSE;
     printf("Anyway, this cake is great.\n"
            "It’s so delicious and moist.\n");
 }
+
 void *batterAdder(void *arg) {
     pthread_mutex_lock(&lock);
     while (1) {
@@ -40,6 +47,7 @@ void *batterAdder(void *arg) {
         pthread_cond_signal(&readyToBake);
     }
 }
+
 void *eggBreaker(void *arg) {
     pthread_mutex_lock(&lock);
     while (1) {
@@ -51,6 +59,7 @@ void *eggBreaker(void *arg) {
         pthread_cond_signal(&readyToBake);
     }
 }
+
 void *bowlHeater(void *arg) {
     pthread_mutex_lock(&lock);
     while (1) {
@@ -63,6 +72,7 @@ void *bowlHeater(void *arg) {
         pthread_cond_signal(&startEating);
     }
 }
+
 void *cakeEater(void *arg) {
     pthread_mutex_lock(&lock);
     while (1) {
