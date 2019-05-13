@@ -15,7 +15,7 @@ int numEngineInLine = FALSE;
 int numRoofInLine = FALSE;
 
 int carReady = FALSE;
-int carNumber = FALSE;
+int carNumber = 0;
 
 pthread_mutex_t lock;
 pthread_mutex_t tireSeatEngine_mutex;
